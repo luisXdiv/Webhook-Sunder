@@ -1,600 +1,708 @@
-<!DOCTYPE html>
+<div style="display:flex;align-items:center;gap:18px;margin-bottom:18px"></div>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Discord Webhook Builder</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Webhook Builder — Futuristic Dark</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary: #5865f2;
-      --primary-hover: #4752c4;
-      --bg-primary: #36393f;
-      --bg-secondary: #2f3136;
-      --bg-tertiary: #202225;
-      --text-normal: #dcddde;
-      --text-muted: #b9bbbe;
-      --border-radius: 8px;
-      --transition: all 0.2s ease;
+    :root{
+      --bg:#071018;
+      --panel:#0b0c10;
+      --muted:#9aa0a6;
+      --neon-1:#7c5cff;
+      --neon-2:#00e5ff;
+      --card-radius:10px;
+      --shadow: 0 6px 20px rgba(0,0,0,0.45);
+      --success:#22c55e;
+      --danger:#ff6b6b;
+      --glass-border: rgba(255,255,255,0.03);
+      /* preview adjustments: slightly smaller + fog variables */
+      --preview-title-size:1.0rem;
+      --preview-avatar-size:40px;
+      --preview-radius:8px;
+      --preview-scale:0.98;
+      --fog-weak: rgba(255,255,255,0.025);
+      --fog-strong: rgba(255,255,255,0.045);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    /* simplified background */
+    html,body{height:100%;margin:0;background:
+      radial-gradient(600px 300px at 10% 10%, rgba(124,92,255,0.04), transparent),
+      radial-gradient(500px 240px at 90% 90%, rgba(0,229,255,0.03), transparent),
+      var(--bg);
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;color:#e9eef8;-webkit-font-smoothing:antialiased;
     }
 
-    body {
-      background: var(--bg-tertiary);
-      color: var(--text-normal);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      line-height: 1.5;
-      padding: 20px;
-      min-height: 100vh;
-    }
+    *{box-sizing:border-box}
+    .app{max-width:1100px;margin:24px auto;padding:16px;display:grid;grid-template-columns:420px 1fr;gap:18px;align-items:start}
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1.2fr;
-      gap: 24px;
-      height: calc(100vh - 40px);
+    /* panels (clean & subtle) */
+    .panel, .preview {
+      background: rgba(255,255,255,0.02);
+      border-radius:var(--card-radius);padding:14px;box-shadow:var(--shadow);overflow:auto;
+      border:1px solid var(--glass-border);
+      transition: transform .12s ease, box-shadow .12s ease;
     }
-
-    .panel {
-      background: var(--bg-secondary);
-      padding: 24px;
-      border-radius: var(--border-radius);
-      overflow-y: auto;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    .panel:hover, .preview:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.5); }
+ 
+    .head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+    .logo{
+      width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;
+      background:linear-gradient(135deg,var(--neon-1),var(--neon-2));color:#04122a00;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0);font-size:16px;overflow:hidden;
     }
+ 
+    h1{font-size:1rem;margin:0}
+    .sub{color:var(--muted);font-size:0.86rem}
 
-    .panel h2 {
-      color: var(--primary);
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 20px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid rgba(79, 84, 92, 0.48);
+    label{display:block;color:var(--muted);font-size:0.78rem;margin:8px 0 6px}
+    .row{display:flex;gap:10px}
+    .col{flex:1}
+
+    input[type="text"], .input, textarea, input[type="url"], select {
+      width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);color:inherit;font-size:0.96rem;outline:none;
+      transition: box-shadow .14s ease, transform .12s ease, border-color .12s ease;
     }
-
-    .panel h3 {
-      color: var(--text-normal);
-      font-size: 1rem;
-      font-weight: 600;
-      margin: 20px 0 12px;
-    }
-
-    input, textarea, select {
-      width: 100%;
-      padding: 10px 12px;
-      margin: 6px 0 16px;
-      background: var(--bg-tertiary);
-      border: 1px solid rgba(79, 84, 92, 0.3);
-      border-radius: 4px;
-      color: var(--text-normal);
-      font-family: inherit;
-      font-size: 0.9375rem;
-      transition: var(--transition);
-    }
-
+    input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.35); }
     input:focus, textarea:focus, select:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.3);
+      box-shadow: 0 8px 30px rgba(124,92,255,0.12); transform: translateY(-2px); border-color: rgba(124,92,255,0.28);
+    }
+    textarea{min-height:100px;resize:vertical}
+
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .btn{
+      background:var(--neon-1);border:none;color:white;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:700;
+      display:inline-flex;align-items:center;gap:8px;transition: transform .08s ease, box-shadow .08s ease, opacity .12s;
+    }
+    .btn:hover{ transform: translateY(-2px); opacity:0.95; }
+    .btn:active{ transform: translateY(-1px); }
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);box-shadow:none;padding:7px 9px}
+    .btn.warn{background:#ff6b6b;color:white}
+
+    .section-title{display:flex;justify-content:space-between;align-items:center}
+    .muted{color:var(--muted);font-size:0.9rem}
+
+    /* fields */
+    .fields{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+    .field{
+      display:flex;gap:8px;align-items:center;padding:10px;border-radius:10px;border:1px dashed rgba(255,255,255,0.03);
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent); transition: box-shadow .12s, transform .12s;
+    }
+    .field:hover{ box-shadow: 0 8px 30px rgba(2,6,23,0.45); transform: translateY(-3px); }
+    .field input{padding:8px;border-radius:8px}
+
+    .field .actions .btn.ghost{padding:6px 8px;font-weight:600;border-radius:8px}
+
+    /* file upload area + chip */
+    .upload-area{display:flex;gap:8px;align-items:center}
+    .upload-btn{background:linear-gradient(90deg,#0f1724,rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px 10px;border-radius:10px;cursor:pointer;transition:transform .12s}
+    .upload-btn:hover{ transform: translateY(-2px); }
+    .file-name{font-size:0.85rem;color:var(--muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+    .file-chip{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.02);padding:6px 8px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);font-size:0.84rem;color:var(--muted)}
+    .file-chip button{background:transparent;border:none;color:var(--muted);cursor:pointer;padding:4px;border-radius:6px}
+    .file-chip button:hover{background:rgba(255,255,255,0.02);color:#fff}
+
+    /* message toolbar */
+    .toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+    .tool-btn{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:6px 8px;border-radius:10px;cursor:pointer;font-weight:700;transition:background .12s, transform .12s}
+    .tool-btn:hover{ background: rgba(255,255,255,0.015); transform: translateY(-2px); }
+
+    /* preview */
+    .preview-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .preview-head .app-title{display:flex;flex-direction:column;gap:2px}
+    .preview-head .app-title h2{margin:0;font-size:var(--preview-title-size);font-weight:700;color:#fff}
+    .preview-head .app-title .subtitle{font-size:0.82rem;color:var(--muted)}
+    .discord-card{
+      transform: scale(var(--preview-scale));
+      transform-origin: top left;
+      background: linear-gradient(180deg,#0a0c0f,#07080a);
+      border-radius:var(--preview-radius);
+      padding:12px;
+      border-left:3px solid var(--neon-1);
+      display:flex;gap:10px;align-items:flex-start;
+      transition: box-shadow .18s, transform .12s;
+      box-shadow: 0 10px 28px rgba(2,6,23,0.35);
+      backdrop-filter: blur(2px);
+    }
+    .discord-card:hover{ transform: translateY(-3px) scale(1); box-shadow:0 18px 40px rgba(2,6,23,0.45); }
+    .avatar{ width:var(--preview-avatar-size); height:var(--preview-avatar-size); border-radius:8px; background:linear-gradient(135deg,var(--neon-1),var(--neon-2)); background-size:cover; flex:0 0 auto }
+    /* slightly tighter embed body */
+    .embed-body { max-width:640px; font-size:0.96rem; }
+    /* keep update animation subtle (optional) */
+    .discord-card.is-updated { transition: transform .28s cubic-bezier(.2,.9,.2,1); }
+
+    /* small helpers */
+    .counter{font-size:0.78rem;color:var(--muted);margin-left:6px}
+    .bad{color:var(--danger)}
+    .ok{color:var(--success)}
+
+    @media (max-width:980px){
+      .app{grid-template-columns:1fr;padding:12px}
+      .embed-fields{grid-template-columns:1fr}
+      .thumb{width:100%;height:160px}
     }
 
-    textarea {
-      min-height: 80px;
-      resize: vertical;
+    /* preview card polish */
+    .discord-card{
+      border-radius:var(--preview-radius);
+      padding:18px;
+      gap:16px;
+      transition: transform .22s cubic-bezier(.2,.9,.2,1), box-shadow .22s;
     }
 
-    button {
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 10px 16px;
-      font-weight: 500;
-      font-size: 0.9375rem;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      margin: 8px 0;
-      width: 100%;
-    }
+    /* pop animation when preview updates */
+    @keyframes previewPop { 0% { transform: scale(.995); opacity:.96 } 60% { transform: scale(1.01); opacity:1 } 100% { transform: scale(1); opacity:1 } }
+    .discord-card.is-updated { animation: previewPop .36s ease; }
 
-    button:hover {
-      background: var(--primary-hover);
-      transform: translateY(-1px);
-    }
+    /* constrain embed text width for readability */
+    .embed-body { max-width:700px; }
 
-    button:active {
-      transform: translateY(0);
-    }
+    /* small swatch buttons for color presets */
+    .color-swatch { width:26px;height:26px;border-radius:6px;border:1px solid rgba(255,255,255,0.04);cursor:pointer;display:inline-block;margin-right:6px; }
+    .color-swatch:hover{ opacity:0.95; transform:none; }
 
-    .preview {
-      background: var(--bg-primary);
-      padding: 24px;
-      border-radius: var(--border-radius);
-      overflow-y: auto;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .preview h2 {
-      color: var(--text-normal);
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 20px;
-    }
-
-    .embed {
-      background: var(--bg-secondary);
-      border-left: 4px solid var(--primary);
-      padding: 16px;
-      border-radius: 4px;
-      max-width: 100%;
-      word-wrap: break-word;
-    }
-
-    .embed .author {
-      display: flex;
-      align-items: center;
-      margin-bottom: 12px;
-      font-weight: 500;
-    }
-
-    .embed .author img {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      margin-right: 8px;
-      object-fit: cover;
-    }
-
-    .embed .title {
-      font-weight: 600;
-      font-size: 1rem;
-      margin-bottom: 8px;
-      color: #fff;
-    }
-
-    .embed .description {
-      white-space: pre-line;
-      margin-bottom: 12px;
-      color: var(--text-normal);
-    }
-
-    .embed .thumbnail {
-      float: right;
-      width: 80px;
-      height: 80px;
-      border-radius: 4px;
-      margin: 0 0 12px 12px;
-      object-fit: cover;
-    }
-
-    .embed .image {
-      max-width: 100%;
-      border-radius: 4px;
-      margin-top: 12px;
-      display: block;
-    }
-
-    .embed .fields {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 12px 0;
-    }
-
-    .embed .field {
-      background: rgba(32, 34, 37, 0.5);
-      padding: 10px;
-      border-radius: 4px;
-    }
-
-    .embed .field-name {
-      font-weight: 600;
-      font-size: 0.875rem;
-      margin-bottom: 4px;
-      color: #fff;
-    }
-
-    .embed .field-value {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-    }
-
-    .embed .footer {
-      display: flex;
-      align-items: center;
-      font-size: 0.75rem;
-      margin-top: 12px;
-      color: var(--text-muted);
-    }
-
-    .embed .footer img {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      margin-right: 6px;
-      object-fit: cover;
-    }
-
-    .button-group {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 16px 0;
-    }
-
-    .button-group button {
-      margin: 0;
-    }
-
-    .file-input {
-      display: none;
-    }
-
-    .file-label {
-      display: block;
-      text-align: center;
-      padding: 10px;
-      background: var(--bg-tertiary);
-      border-radius: 4px;
-      cursor: pointer;
-      transition: var(--transition);
-      margin: 8px 0 16px;
-      border: 1px dashed rgba(79, 84, 92, 0.3);
-    }
-
-    .file-label:hover {
-      background: rgba(79, 84, 92, 0.16);
-    }
-
-    @media (max-width: 1024px) {
-      .container {
-        grid-template-columns: 1fr;
-        height: auto;
-      }
-      
-      .panel, .preview {
-        height: 70vh;
-      }
-    }
-
-    @media (max-width: 640px) {
-      body {
-        padding: 12px;
-      }
-      
-      .panel, .preview {
-        padding: 16px;
-      }
-      
-      .embed .fields {
-        grid-template-columns: 1fr;
-      }
-      
-      .button-group {
-        grid-template-columns: 1fr;
-      }
-    }
+    /* improve file-chip visuals */
+    .file-chip{ font-size:0.82rem; padding:6px 10px; }
   </style>
 </head>
 <body>
-
-  <div class="container">
+  <div class="app">
     <div class="panel">
-      <h2>Webhook Settings</h2>
-      <input id="webhookUrl" placeholder="https://discord.com/api/webhooks/...">
-      <input id="botName" placeholder="Bot Username">
-      <input id="botAvatar" placeholder="https://example.com/avatar.png">
-
-      <h2>Embed Settings</h2>
-      <input id="title" placeholder="Title">
-      <textarea id="description" placeholder="Description"></textarea>
-      <div style="display: flex; align-items: center; gap: 10px; margin: 5px 0 15px;">
-        <label for="color" style="font-size: 0.9rem; color: var(--text-muted);">Color:</label>
-        <input id="color" type="color" value="#5865f2" style="width: 60px; height: 30px; padding: 0;">
+      <div class="head">
+        <div class="logo">
+          <img src="assest\11.gif" alt="Logo" style="width:40px;height:40px;vertical-align:middle;border-radius:10px;">
+        </div>
       </div>
-      <label style="display: flex; align-items: center; gap: 8px; margin: 10px 0 20px; cursor: pointer;">
-        <input type="checkbox" id="timestamp" style="width: auto;">
-        <span>Include Timestamp</span>
-      </label>
-
-      <h3>Author</h3>
-      <input id="authorName" placeholder="Author Name">
-      <input id="authorUrl" placeholder="https://example.com/author" type="url">
-      <input id="authorIcon" placeholder="https://example.com/author.png" type="url">
-
-      <h3>Media</h3>
-      <input id="thumbnailUrl" placeholder="https://example.com/thumbnail.png" type="url">
-      <input id="imageUrl" placeholder="https://example.com/image.png" type="url">
-
-      <h3>Footer</h3>
-      <input id="footerText" placeholder="Footer Text">
-      <input id="footerIcon" placeholder="https://example.com/icon.png" type="url">
-
-      <h3>Fields</h3>
-      <div id="fields"></div>
-      <button onclick="addField()" style="margin-top: 10px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-        Add Field
-      </button>
-
-      <h2>Config</h2>
-      <div class="button-group">
-        <button onclick="saveConfig()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-            <polyline points="17 21 17 13 7 13 7 21"></polyline>
-            <polyline points="7 3 7 8 15 8"></polyline>
-          </svg>
-          Save
-        </button>
-        <button onclick="loadConfig()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          Load
-        </button>
-      </div>
-      
-      <div class="button-group">
-        <button onclick="exportConfig()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          Export
-        </button>
-        <label class="file-label" for="importFile">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-          Import
-        </label>
-        <input type="file" id="importFile" class="file-input" onchange="importConfig(event)">
+        <div>
+          <h1>Webhook Builder</h1>
+          <div class="sub">Futuristic dark — drag fields, upload images, send</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <button id="themeBtn" class="btn ghost">Theme</button>
+          <button class="btn ghost" onclick="clearForm()">Clear</button>
+        </div>
       </div>
 
-      <h2>Actions</h2>
-      <div class="button-group">
-        <button onclick="sendWebhook()" style="background: #3ba55c;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg>
-          Send Webhook
-        </button>
-        <button onclick="copyJson()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-          Copy JSON
-        </button>
+      <div class="section">
+        <div class="section-title"><strong>Webhook</strong><span class="muted">target & bot</span></div>
+        <label>Webhook URL <span id="webhookValid" class="counter"></span></label>
+        <input id="webhookUrl" class="input" placeholder="https://discord.com/api/webhooks/..." />
+        <div class="row">
+          <div class="col">
+            <label>Bot Username</label>
+            <input id="botName" class="input" placeholder="Bot Username" />
+          </div>
+          <div class="col">
+            <label>Bot Avatar URL</label>
+            <input id="botAvatar" class="input" placeholder="https://..." />
+          </div>
+        </div>
+      </div>
+
+      <!-- Message content + toolbar + templates -->
+      <div class="section">
+        <div class="section-title"><strong>Message</strong><span class="muted">content outside embed • templates • quick inserts</span></div>
+        <label>Message content <span id="msgCount" class="counter">0</span></label>
+        <textarea id="message" class="input" placeholder="Text content (mentions, markdown)"></textarea>
+
+        <div class="toolbar" aria-hidden="false">
+          <button class="tool-btn" onclick="applyFormat('**','**')">B</button>
+          <button class="tool-btn" onclick="applyFormat('*','*')">I</button>
+          <button class="tool-btn" onclick="applyFormat('`','`')">Inline code</button>
+          <button class="tool-btn" onclick="applyFormat('\\n\\`\\`\\`\\n','\\n\\`\\`\\`\\n')">Code block</button>
+          <button class="tool-btn" onclick="applyFormat('[','](url)')">Link</button>
+          <button class="tool-btn" onclick="insertText('@here')">@here</button>
+          <button class="tool-btn" onclick="insertText('@everyone')">@everyone</button>
+          <button class="tool-btn" onclick="insertMention()">@user</button>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="tool-btn" onclick="toggleEmojiPicker()">😊</button>
+            <div id="emojiPicker" style="display:none;background:rgba(255,255,255,0.02);padding:6px;border-radius:8px;gap:6px;display:flex;flex-wrap:wrap;max-width:240px">
+              <button class="tool-btn" onclick="insertText('😀')">😀</button>
+              <button class="tool-btn" onclick="insertText('🎉')">🎉</button>
+              <button class="tool-btn" onclick="insertText('🔥')">🔥</button>
+              <button class="tool-btn" onclick="insertText('✅')">✅</button>
+              <button class="tool-btn" onclick="insertText('⚠️')">⚠️</button>
+              <button class="tool-btn" onclick="insertText('❤️')">❤️</button>
+            </div>
+          </div>
+          <label style="display:flex;align-items:center;gap:6px;color:var(--muted);margin-left:auto"><input id="tts" type="checkbox" /> TTS</label>
+        </div>
+
+        <div class="templates">
+          <input id="templateName" class="input" placeholder="template name" style="width:160px;padding:8px"/>
+          <button class="btn ghost" onclick="saveTemplate()">Save</button>
+          <select id="templateSelect" class="input" style="width:220px;padding:8px" onchange="loadSelectedTemplate()"></select>
+          <button class="btn ghost" onclick="deleteTemplate()">Delete</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><strong>Embed</strong><span class="muted">title / description / color</span></div>
+        <label>Title <span id="titleCount" class="counter">0/256</span></label>
+        <input id="title" class="input" maxlength="256" placeholder="Embed title" />
+        <label>Description <span id="descCount" class="counter">0/4096</span></label>
+        <textarea id="description" class="input" maxlength="4096" placeholder="Embed description"></textarea>
+
+        <div class="row" style="align-items:center;margin-top:8px">
+          <div style="flex:0 0 220px">
+            <label>Color</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="color" type="color" value="#7c5cff" style="width:56px;height:42px;border-radius:8px;border:none;background:transparent" />
+              <div id="colorSwatches" style="display:flex;gap:6px;align-items:center"></div>
+              <button class="btn ghost" onclick="saveSwatch()" title="Save color">Save</button>
+            </div>
+            <div style="margin-top:8px">
+              <select id="swatchSelect" class="input" style="width:100%;padding:6px" onchange="applySelectedSwatch()"></select>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;justify-content:flex-end;align-items:center">
+            <label style="display:flex;align-items:center;gap:8px;color:var(--muted)"><input type="checkbox" id="timestamp" /> Include timestamp</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><strong>Author / Media</strong><span class="muted">optional</span></div>
+        <label>Author Name</label>
+        <input id="authorName" class="input" placeholder="Author name" />
+        <div class="row">
+          <div class="col">
+            <label>Author URL</label>
+            <input id="authorUrl" class="input" placeholder="https://..." />
+          </div>
+          <div class="col">
+            <label>Author Icon</label>
+            <input id="authorIcon" class="input" placeholder="https://..." />
+          </div>
+        </div>
+
+        <div style="margin-top:8px">
+          <div class="row">
+            <div style="flex:1">
+              <label>Thumbnail (url or upload)</label>
+              <div class="upload-area">
+                <input id="thumbnailUrl" class="input" placeholder="https://... (thumbnail)" />
+                <button class="upload-btn" onclick="document.getElementById('thumbFile').click()">Upload</button>
+                <input id="thumbFile" type="file" accept="image/*" style="display:none" onchange="handleFile(event,'thumb')">
+                <span id="thumbName" class="file-name"></span>
+                <span id="thumbChip" class="file-chip hidden" style="display:none"><span id="thumbChipName"></span><button onclick="clearUpload('thumb')">✕</button></span>
+              </div>
+            </div>
+            <div style="flex:1">
+              <label>Image (url or upload)</label>
+              <div class="upload-area">
+                <input id="imageUrl" class="input" placeholder="https://... (image)" />
+                <button class="upload-btn" onclick="document.getElementById('imgFile').click()">Upload</button>
+                <input id="imgFile" type="file" accept="image/*" style="display:none" onchange="handleFile(event,'image')">
+                <span id="imgName" class="file-name"></span>
+                <span id="imgChip" class="file-chip hidden" style="display:none"><span id="imgChipName"></span><button onclick="clearUpload('image')">✕</button></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <label>Footer Text</label>
+        <input id="footerText" class="input" placeholder="Footer text" />
+        <label>Footer Icon</label>
+        <input id="footerIcon" class="input" placeholder="https://... (icon)" />
+      </div>
+
+      <div class="section">
+        <div class="section-title"><strong>Fields</strong><span class="muted">drag to reorder • inline • dup • remove</span></div>
+        <div id="fields" class="fields"></div>
+        <div class="controls" style="margin-top:10px">
+          <button class="btn" onclick="addField()">+ Field</button>
+          <button class="btn ghost" onclick="clearFields()">Clear fields</button>
+          <button class="btn ghost" onclick="preset()">Sample</button>
+        </div>
+      </div>
+
+      <div style="margin-top:14px" class="section">
+        <div class="controls">
+          <button id="sendBtn" class="btn" onclick="sendWebhook()">Send Webhook</button>
+          <button class="btn ghost" onclick="copyJson()">Copy JSON</button>
+          <button class="btn ghost" onclick="saveConfig()">Save</button>
+          <button class="btn ghost" onclick="loadConfig()">Load</button>
+          <button class="btn ghost" onclick="exportConfig()">Export</button>
+          <label class="btn ghost" style="cursor:pointer"><input id="importFile" type="file" accept=".json" style="display:none" onchange="importConfig(event)" /> Import</label>
+        </div>
       </div>
     </div>
 
     <div class="preview">
-      <h2>Live Preview</h2>
-      <div id="embedPreview" class="embed">
-        <div style="color: var(--text-muted); text-align: center; padding: 20px;">
-          Your embed preview will appear here
+      <div class="preview-head">
+        <div class="app-title">
+          <h2>Webhook Builder</h2>
+          <div class="subtitle muted">Live Preview</div>
+          <div class="muted" id="meta">—</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="muted" id="embedCount">0 embeds</div>
+          <div class="muted" id="jsonSize">0 KB</div>
         </div>
       </div>
+
+      <div id="previewCard" class="discord-card">
+        <div class="avatar"></div>
+        <div style="width:100%">
+          <div id="messagePreview" style="color:var(--muted);margin-bottom:8px;white-space:pre-wrap"></div>
+          <div class="embed-body" id="embedBody">
+            <div style="text-align:center;color:var(--muted);padding:28px">Your embed preview will appear here</div>
+          </div>
+        </div>
+      </div>
+
+      <details style="margin-top:12px;color:var(--muted)"><summary style="cursor:pointer">Raw JSON</summary><pre id="raw" style="white-space:pre-wrap;margin-top:8px;color:var(--muted)"></pre></details>
     </div>
   </div>
 
+  <div id="toast" style="position:fixed;right:18px;bottom:18px;background:#071018;color:#dff;padding:10px 12px;border-radius:10px;display:none;font-weight:700"></div>
+
 <script>
+/* state */
 let fields = [];
+let uploaded = { thumb: null, image: null };
+let templates = []; // {name, content}
+let swatches = [];
 
-function updatePreview() {
-  const title = document.getElementById("title").value;
-  const desc = document.getElementById("description").value;
-  const color = document.getElementById("color").value;
-  const authorName = document.getElementById("authorName").value;
-  const authorUrl = document.getElementById("authorUrl").value;
-  const authorIcon = document.getElementById("authorIcon").value;
-  const thumb = document.getElementById("thumbnailUrl").value;
-  const img = document.getElementById("imageUrl").value;
-  const footerText = document.getElementById("footerText").value;
-  const footerIcon = document.getElementById("footerIcon").value;
-  const ts = document.getElementById("timestamp").checked ? new Date().toLocaleString() : "";
+/* utils */
+const $ = id => document.getElementById(id);
+function toast(msg, t=2200){ const el = $('toast'); el.textContent = msg; el.style.display='block'; setTimeout(()=>el.style.display='none', t); }
+function esc(s){ if(!s && s!==0) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#39;"); }
 
-  let hasContent = false;
-  let html = `<div style="border-left: 4px solid ${color}; padding-left: 12px;">`;
-  
-  // Author
-  if (authorName) {
-    hasContent = true;
-    if (authorUrl) {
-      html += `<div class="author">${authorIcon ? `<img src="${authorIcon}" onerror="this.style.display='none'">` : ''}<a href="${authorUrl}" style="color: #00aff4; text-decoration: none;">${authorName}</a></div>`;
-    } else {
-      html += `<div class="author">${authorIcon ? `<img src="${authorIcon}" onerror="this.style.display='none'">` : ''}${authorName}</div>`;
-    }
-  }
+/* theme (simple toggle) */
+function toggleTheme(){ document.body.classList.toggle('light'); }
+$('themeBtn').addEventListener('click', toggleTheme);
 
-  // Title
-  if (title) {
-    hasContent = true;
-    html += `<div class="title">${title}</div>`;
-  }
+/* webhook validation */
+function validateWebhook(){
+  const v = $('webhookUrl').value.trim();
+  const re = /^https?:\/\/(canary\.|ptb\.)?(discord(?:app)?\.com|discord\.com)\/api\/webhooks\/\d+\/[\w-]+/i;
+  const ok = re.test(v);
+  $('webhookValid').textContent = ok ? 'URL OK' : 'Invalid URL';
+  if(!ok) $('webhookValid').className='counter bad'; else $('webhookValid').className='counter ok';
+  $('sendBtn').disabled = !ok;
+  return ok;
+}
 
-  // Description
-  if (desc) {
-    hasContent = true;
-    html += `<div class="description">${desc.replace(/\n/g, '<br>')}</div>`;
-  }
+/* counters */
+function updateCounters(){
+  $('titleCount').textContent = ($('title').value||'').length + '/256';
+  $('descCount').textContent = ($('description').value||'').length + '/4096';
+  $('msgCount').textContent = ($('message').value||'').length;
+}
 
-  // Fields
-  const hasFields = fields.some(f => f.name || f.value);
-  if (hasFields) {
-    hasContent = true;
-    html += '<div class="fields">';
-    fields.forEach(f => {
-      if (f.name || f.value) {
-        html += `
-        <div class="field">
-          ${f.name ? `<div class="field-name">${f.name}</div>` : ''}
-          ${f.value ? `<div class="field-value">${f.value.replace(/\n/g, '<br>')}</div>` : ''}
-        </div>`;
-      }
-    });
-    html += '</div>';
-  }
-
-  // Thumbnail (floated right)
-  if (thumb) {
-    hasContent = true;
-    html += `<img class="thumbnail" src="${thumb}" onerror="this.style.display='none'">`;
-  }
-
-  // Main Image
-  if (img) {
-    hasContent = true;
-    html += `<img class="image" src="${img}" onerror="this.style.display='none'">`;
-  }
-
-  // Footer
-  if (footerText || ts) {
-    hasContent = true;
-    html += '<div class="footer">';
-    if (footerIcon) {
-      html += `<img src="${footerIcon}" onerror="this.style.display='none'">`;
-    }
-    if (footerText) {
-      html += `<span>${footerText}</span>`;
-    }
-    if (ts) {
-      if (footerText) html += ' • ';
-      html += `<span>${ts}</span>`;
-    }
-    html += '</div>';
-  }
-
-  html += '</div>';
-  
-  const preview = document.getElementById("embedPreview");
-  if (hasContent) {
-    preview.innerHTML = html;
+/* message helpers */
+function insertAtCursor(el, txt){
+  const start = el.selectionStart || 0;
+  const end = el.selectionEnd || 0;
+  const v = el.value || '';
+  el.value = v.slice(0,start) + txt + v.slice(end);
+  el.selectionStart = el.selectionEnd = start + txt.length;
+  el.focus();
+  updatePreview();
+}
+function insertText(txt){ insertAtCursor($('message'), txt); }
+function applyFormat(pre, post){
+  const el = $('message');
+  const s = el.value.substring(el.selectionStart, el.selectionEnd);
+  if(s){
+    insertAtCursor(el, pre + s + post);
   } else {
-    preview.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 20px;">Your embed preview will appear here</div>';
+    insertAtCursor(el, pre + post);
+    el.selectionStart = el.selectionEnd = el.selectionStart - post.length;
+  }
+}
+function toggleEmojiPicker(){ const p = $('emojiPicker'); p.style.display = p.style.display === 'flex' ? 'none' : 'flex'; }
+function insertMention(){ const id = prompt('User ID to mention (put numeric id)'); if(id) insertText(`<@${id}>`); }
+
+/* templates */
+function loadTemplates(){
+  try{ templates = JSON.parse(localStorage.getItem('wh_templates') || '[]'); }catch(e){ templates = []; }
+  const sel = $('templateSelect');
+  sel.innerHTML = '<option value="">— select —</option>';
+  templates.forEach((t, i)=> {
+    const o = document.createElement('option'); o.value = i; o.textContent = t.name; sel.appendChild(o);
+  });
+}
+/* color swatches (presets) */
+function loadColorSwatches(){
+  try{ swatches = JSON.parse(localStorage.getItem('wh_color_swatches') || '[]'); }catch(e){ swatches = []; }
+  // default starter palette
+  if(!swatches || swatches.length === 0) swatches = ['#7c5cff','#00e5ff','#22c55e','#ff8a6b'];
+  renderColorSwatches();
+}
+function renderColorSwatches(){
+  const container = $('colorSwatches');
+  const sel = $('swatchSelect');
+  container.innerHTML = '';
+  sel.innerHTML = '<option value="">— presets —</option>';
+  swatches.forEach((c,i)=>{
+    const b = document.createElement('button');
+    b.className = 'color-swatch';
+    b.style.background = c;
+    b.title = c;
+    b.onclick = ()=>{ $('color').value = c; updatePreview(); };
+    container.appendChild(b);
+    const o = document.createElement('option'); o.value = i; o.textContent = c; sel.appendChild(o);
+  });
+}
+function saveSwatch(){
+  const c = $('color').value;
+  if(!c) return;
+  if(swatches.includes(c)){ toast('Already saved'); return; }
+  swatches.unshift(c);
+  swatches = swatches.slice(0,8); // keep recent 8
+  localStorage.setItem('wh_color_swatches', JSON.stringify(swatches));
+  renderColorSwatches();
+  toast('Color saved');
+}
+function applySelectedSwatch(){
+  const v = $('swatchSelect').value;
+  if(v === '') return;
+  const c = swatches[+v];
+  if(c){ $('color').value = c; updatePreview(); }
+}
+
+/* fields rendering */
+function renderFields(){
+  const container = $('fields');
+  container.innerHTML = '';
+  fields.forEach((f,i)=>{
+    const row = document.createElement('div');
+    row.className='field';
+    row.draggable = true;
+    row.dataset.i = i;
+
+    row.innerHTML = `
+      <input class="input" placeholder="name" value="${esc(f.name)}" style="flex:0.38"/>
+      <input class="input" placeholder="value" value="${esc(f.value)}" style="flex:1"/>
+      <label style="display:flex;align-items:center;gap:6px;color:var(--muted)"><input type="checkbox" ${f.inline? 'checked':''}/> inline</label>
+      <div class="actions">
+        <button class="btn ghost" data-act="dup">Dup</button>
+        <button class="btn ghost" data-act="rm">Remove</button>
+      </div>
+    `;
+    // drag events
+    row.addEventListener('dragstart', e=>{ row.classList.add('dragging'); e.dataTransfer.setData('text/plain', i); });
+    row.addEventListener('dragend', ()=> row.classList.remove('dragging'));
+    row.addEventListener('dragover', e=> e.preventDefault());
+    row.addEventListener('drop', e=>{
+      e.preventDefault();
+      const from = +e.dataTransfer.getData('text/plain'), to = +row.dataset.i;
+      if(from===to) return;
+      const item = fields.splice(from,1)[0];
+      fields.splice(to,0,item);
+      renderFields(); updatePreview();
+    });
+
+    // input wiring
+    const nameInput = row.querySelector('input[placeholder="name"]');
+    const valueInput = row.querySelector('input[placeholder="value"]');
+    const inlineBox = row.querySelector('input[type="checkbox"]');
+    nameInput.addEventListener('input', ()=> { fields[i].name = nameInput.value; updatePreview(); });
+    valueInput.addEventListener('input', ()=> { fields[i].value = valueInput.value; updatePreview(); });
+    inlineBox.addEventListener('change', ()=> { fields[i].inline = inlineBox.checked; updatePreview(); });
+
+    row.querySelector('[data-act="rm"]').addEventListener('click', ()=> { fields.splice(i,1); renderFields(); updatePreview(); });
+    row.querySelector('[data-act="dup"]').addEventListener('click', ()=> { fields.splice(i+1,0, {...fields[i]} ); renderFields(); updatePreview(); });
+
+    container.appendChild(row);
+  });
+}
+
+/* add / clear fields */
+function addField(name='', value='', inline=false){ fields.push({name, value, inline}); renderFields(); updatePreview(); }
+function clearFields(){ fields = []; renderFields(); updatePreview(); }
+
+/* file upload handlers */
+function handleFile(ev, which){
+  const f = ev.target.files && ev.target.files[0];
+  if(!f) return;
+  if(!f.type.startsWith('image/')) { toast('File must be image'); return; }
+  uploaded[which] = f;
+  if(which==='thumb'){
+    $('thumbName').textContent = f.name;
+    $('thumbChipName').textContent = f.name;
+    $('thumbChip').style.display = 'inline-flex';
+  } else {
+    $('imgName').textContent = f.name;
+    $('imgChipName').textContent = f.name;
+    $('imgChip').style.display = 'inline-flex';
+  }
+  updatePreview();
+}
+function clearUpload(which){
+  if(which==='thumb'){
+    uploaded.thumb = null;
+    $('thumbName').textContent = '';
+    $('thumbChipName').textContent = '';
+    $('thumbChip').style.display = 'none';
+    $('thumbFile').value = '';
+  } else {
+    uploaded.image = null;
+    $('imgName').textContent = '';
+    $('imgChipName').textContent = '';
+    $('imgChip').style.display = 'none';
+    $('imgFile').value = '';
+  }
+  updatePreview();
+}
+
+/* build embed json used for preview / send */
+function getEmbedPayload(useAttachments = false){
+  const colorHex = $('color').value || '#7c5cff';
+  const color = parseInt(colorHex.replace('#',''),16) || 0x7c5cff;
+  const embed = {
+    title: $('title').value || undefined,
+    description: $('description').value || undefined,
+    color,
+    timestamp: $('timestamp').checked ? new Date().toISOString() : undefined,
+    author: { name: $('authorName').value || undefined, url: $('authorUrl').value || undefined, icon_url: $('authorIcon').value || undefined },
+    thumbnail: { url: uploaded.thumb && useAttachments ? `attachment://${uploaded.thumb.name}` : ($('thumbnailUrl').value || undefined) },
+    image: { url: uploaded.image && useAttachments ? `attachment://${uploaded.image.name}` : ($('imageUrl').value || undefined) },
+    footer: { text: $('footerText').value || undefined, icon_url: $('footerIcon').value || undefined },
+    fields: fields.filter(f=>f.name||f.value).map(f=>({ name: f.name, value: f.value, inline: !!f.inline }))
+  };
+  const cleaned = JSON.parse(JSON.stringify(embed, (k,v)=> v===undefined ? undefined : v));
+  const payload = { username: $('botName').value || undefined, avatar_url: $('botAvatar').value || undefined, embeds: [cleaned] };
+  const content = $('message').value || undefined;
+  if(content) payload.content = content;
+  if($('tts').checked) payload.tts = true;
+  return payload;
+}
+
+/* preview update */
+function updatePreview(){
+  validateWebhook();
+  updateCounters();
+
+  const previewPayload = getEmbedPayload(false);
+  const e = previewPayload.embeds[0];
+  const has = e.title || e.description || (e.fields && e.fields.length) || e.thumbnail?.url || e.image?.url || e.author?.name || e.footer?.text;
+  const container = $('embedBody');
+
+  // message preview
+  $('messagePreview').textContent = previewPayload.content || '';
+
+  if(!has){
+    container.innerHTML = `<div style="text-align:center;color:var(--muted);padding:28px">Your embed preview will appear here</div>`;
+  } else {
+    let html = '';
+    if(e.author?.name){
+      html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">` +
+              (e.author.icon_url? `<img src="${esc(e.author.icon_url)}" style="width:36px;height:36px;border-radius:8px;object-fit:cover" onerror="this.style.display='none'">`:'') +
+              `<div style="font-weight:700">${esc(e.author.name)}</div></div>`;
+    }
+    if(e.title) html += `<div class="embed-title">${esc(e.title)}</div>`;
+    if(e.description) html += `<div class="embed-desc">${esc(e.description).replace(/\n/g,'<br>')}</div>`;
+    if(e.fields && e.fields.length){
+      html += `<div class="embed-fields">`;
+      e.fields.forEach(f=> html += `<div class="embed-field"><div style="font-weight:700">${esc(f.name)}</div><div style="color:var(--muted);margin-top:6px">${esc(f.value).replace(/\n/g,'<br>')}</div></div>`);
+      html += `</div>`;
+    }
+    if(e.image?.url) html += `<img class="big-image" src="${esc(e.image.url)}" onerror="this.style.display='none'">`;
+    if(e.footer?.text || e.timestamp){
+      html += `<div class="embed-footer" style="display:flex;align-items:center;gap:8px;margin-top:10px;color:var(--muted)">${e.footer?.icon_url? `<img src="${esc(e.footer.icon_url)}" style="width:18px;height:18px;border-radius:50%;object-fit:cover" onerror="this.style.display='none'>` : '' }` +
+              `${e.footer?.text? `<div>${esc(e.footer.text)}</div>` : ''}${e.timestamp? `<div style="margin-left:6px">• ${new Date(e.timestamp).toLocaleString()}</div>` : ''}</div>`;
+    }
+    container.innerHTML = html;
+    const previewCard = $('previewCard');
+    previewCard.style.borderLeftColor = $('color').value || '#7c5cff';
+    // trigger update animation
+    previewCard.classList.remove('is-updated');
+    void previewCard.offsetWidth;
+    previewCard.classList.add('is-updated');
+    const avatar = previewCard.querySelector('.avatar');
+    if($('botAvatar').value) avatar.style.backgroundImage = `url(${esc($('botAvatar').value)})`, avatar.style.backgroundSize='cover';
+    else avatar.style.backgroundImage = '';
+  }
+
+  const raw = JSON.stringify(getEmbedPayload(true), null, 2);
+  $('raw').textContent = raw;
+  $('jsonSize').textContent = Math.round(new Blob([raw]).size/1024) + ' KB';
+  $('embedCount').textContent = (previewPayload.embeds || []).length + ' embeds';
+  $('meta').textContent = (uploaded.thumb ? 'Thumbnail: ' + uploaded.thumb.name : '') + (uploaded.image ? ' • Image: '+uploaded.image.name : '');
+}
+
+/* send webhook (supports attachments) */
+async function sendWebhook(){
+  if(!validateWebhook()){ toast('Invalid webhook URL'); return; }
+  const url = $('webhookUrl').value.trim();
+  const btn = $('sendBtn'); btn.disabled=true; btn.textContent='Sending...';
+  const payload = getEmbedPayload(true);
+
+  try {
+    let resp;
+    if(uploaded.thumb || uploaded.image){
+      const form = new FormData();
+      form.append('payload_json', JSON.stringify(payload));
+      if(uploaded.thumb) form.append('file', uploaded.thumb, uploaded.thumb.name);
+      if(uploaded.image) form.append('file', uploaded.image, uploaded.image.name);
+      resp = await fetch(url, { method: 'POST', body: form });
+    } else {
+      resp = await fetch(url, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    }
+    if(resp.ok) toast('Webhook sent'); else { const t = await resp.text(); toast('Failed: ' + resp.status + ' — ' + t.slice(0,200)); }
+  } catch(err){
+    toast('Network error');
+  } finally {
+    btn.disabled=false; btn.textContent='Send Webhook';
   }
 }
 
-function addField() {
-  const idx = fields.length;
-  fields.push({name:"", value:""});
-  const div = document.createElement("div");
-  div.style.marginBottom = "12px";
-  div.style.display = "grid";
-  div.style.gap = "8px";
-  div.style.gridTemplateColumns = "1fr 1fr";
-  div.innerHTML = `
-    <input placeholder="Field Name" oninput="fields[${idx}].name=this.value;updatePreview()" style="margin: 0;">
-    <input placeholder="Field Value" oninput="fields[${idx}].value=this.value;updatePreview()" style="margin: 0;">
-  `;
-  document.getElementById("fields").appendChild(div);
-  updatePreview();
+/* config helpers */
+function copyJson(){ navigator.clipboard.writeText(JSON.stringify(getEmbedPayload(true),null,2)).then(()=>toast('JSON copied')); }
+function saveConfig(){ localStorage.setItem('webhook_config', JSON.stringify(getEmbedPayload(true))); toast('Saved'); }
+function loadConfig(){
+  const raw = localStorage.getItem('webhook_config'); if(!raw){ toast('No saved'); return; }
+  try{
+    const data = JSON.parse(raw); const e = data.embeds?.[0]||{};
+    $('title').value = e.title||''; $('description').value = e.description||''; $('color').value = e.color ? ('#'+('000000'+(e.color.toString(16))).slice(-6)) : '#7c5cff';
+    $('authorName').value = e.author?.name||''; $('authorUrl').value = e.author?.url||''; $('authorIcon').value = e.author?.icon_url||'';
+    $('thumbnailUrl').value = e.thumbnail?.url||''; $('imageUrl').value = e.image?.url||''; $('footerText').value = e.footer?.text||''; $('footerIcon').value = e.footer?.icon_url||'';
+    $('botName').value = data.username||''; $('botAvatar').value = data.avatar_url||''; $('timestamp').checked = !!e.timestamp;
+    fields = (e.fields||[]).map(f=>({name:f.name||'', value:f.value||'', inline:!!f.inline}));
+    uploaded = { thumb: null, image: null }; $('thumbName').textContent=''; $('imgName').textContent=''; $('thumbChip').style.display='none'; $('imgChip').style.display='none';
+    renderFields(); updatePreview(); toast('Loaded');
+  }catch(e){ toast('Invalid config'); }
+}
+function exportConfig(){ const a = document.createElement('a'); const b = new Blob([JSON.stringify(getEmbedPayload(true),null,2)],{type:'application/json'}); a.href = URL.createObjectURL(b); a.download='webhook.json'; a.click(); URL.revokeObjectURL(a.href); }
+function importConfig(ev){ const file = ev.target.files[0]; if(!file) return; const r = new FileReader(); r.onload = ()=> { localStorage.setItem('webhook_config', r.result); loadConfig(); }; r.readAsText(file); }
+
+/* templates + sample & clear */
+function preset(){
+  $('title').value = 'Welcome to the Server';
+  $('description').value = 'Stylish embed powered by luisxitada — edit then send.';
+  $('color').value = '#00e5ff';
+  $('authorName').value = 'Server Bot'; $('authorIcon').value = 'https://images.unsplash.com/photo-1547721064-da6cfb341d50?w=80&h=80&fit=crop&auto=format';
+  $('thumbnailUrl').value = 'https://images.unsplash.com/photo-1517511620798-cec17d428bc0?w=200&h=200&fit=crop&auto=format';
+  $('imageUrl').value = 'https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?w=1200&h=400&fit=crop&auto=format';
+  fields = [{name:'Active users', value:'1,234', inline:true},{name:'Region', value:'EU', inline:true}];
+  $('message').value = 'Welcome everyone! 🎉';
+  renderFields(); updatePreview(); toast('Sample loaded');
+}
+function clearForm(){
+  if(!confirm('Clear all inputs?')) return;
+  document.querySelectorAll('input,textarea').forEach(i=>{ if(i.type==='checkbox') i.checked=false; else if(i.type!=='file') i.value=''; });
+  fields=[]; uploaded={thumb:null,image:null}; $('thumbName').textContent=''; $('imgName').textContent=''; $('thumbChip').style.display='none'; $('imgChip').style.display='none'; $('message').value='';
+  renderFields(); updatePreview();
 }
 
-function getEmbedJson() {
-  return {
-    username: document.getElementById("botName").value,
-    avatar_url: document.getElementById("botAvatar").value,
-    embeds: [{
-      title: document.getElementById("title").value,
-      description: document.getElementById("description").value,
-      color: parseInt(document.getElementById("color").value.substring(1),16),
-      timestamp: document.getElementById("timestamp").checked ? new Date() : undefined,
-      author: {
-        name: document.getElementById("authorName").value,
-        url: document.getElementById("authorUrl").value,
-        icon_url: document.getElementById("authorIcon").value
-      },
-      thumbnail: { url: document.getElementById("thumbnailUrl").value },
-      image: { url: document.getElementById("imageUrl").value },
-      footer: {
-        text: document.getElementById("footerText").value,
-        icon_url: document.getElementById("footerIcon").value
-      },
-      fields: fields
-    }]
-  };
-}
+/* wiring */
+document.querySelectorAll('input,textarea,select').forEach(el=> el.addEventListener('input', ()=> { updatePreview(); validateWebhook(); }));
+$('webhookUrl').addEventListener('input', validateWebhook);
+$('thumbFile').addEventListener('change', e=>handleFile(e,'thumb'));
+$('imgFile').addEventListener('change', e=>handleFile(e,'image'));
 
-function sendWebhook() {
-  const url = document.getElementById("webhookUrl").value;
-  fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(getEmbedJson())});
-  alert("Webhook Sent!");
-}
+/* templates load */
+loadTemplates();
+loadColorSwatches();
 
-function copyJson() {
-  navigator.clipboard.writeText(JSON.stringify(getEmbedJson(),null,2));
-  alert("JSON copied!");
-}
-
-function saveConfig() {
-  localStorage.setItem("webhookConfig", JSON.stringify(getEmbedJson()));
-  alert("Config Saved!");
-}
-
-function loadConfig() {
-  const data = JSON.parse(localStorage.getItem("webhookConfig")||"{}");
-  if(!data.embeds) return;
-  const e = data.embeds[0];
-  document.getElementById("title").value=e.title||"";
-  document.getElementById("description").value=e.description||"";
-  document.getElementById("color").value="#"+("000000"+e.color.toString(16)).slice(-6);
-  document.getElementById("authorName").value=e.author?.name||"";
-  document.getElementById("authorUrl").value=e.author?.url||"";
-  document.getElementById("authorIcon").value=e.author?.icon_url||"";
-  document.getElementById("thumbnailUrl").value=e.thumbnail?.url||"";
-  document.getElementById("imageUrl").value=e.image?.url||"";
-  document.getElementById("footerText").value=e.footer?.text||"";
-  document.getElementById("footerIcon").value=e.footer?.icon_url||"";
-  fields = e.fields||[];
-  document.getElementById("fields").innerHTML="";
-  fields.forEach((f,i)=>addField());
-  updatePreview();
-}
-
-function exportConfig() {
-  const blob = new Blob([JSON.stringify(getEmbedJson(),null,2)],{type:"application/json"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download="config.json";
-  a.click();
-}
-
-function importConfig(e) {
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ev=>{
-    localStorage.setItem("webhookConfig", ev.target.result);
-    loadConfig();
-  };
-  reader.readAsText(file);
-}
-
-document.querySelectorAll("input,textarea").forEach(el=>el.addEventListener("input",updatePreview));
-updatePreview();
+/* start */
+renderFields(); updatePreview(); validateWebhook();
 </script>
 </body>
 </html>
